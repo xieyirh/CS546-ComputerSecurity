@@ -9,8 +9,22 @@ int main(int argc, char* argv[]){
         keySize = atoi(argv[2]);
         keyGen(keySize, argv[3]);
     }
+    else if (argc == 4 && strcmp(argv[1],"-e")== 0){
+        FILE* file = fopen(argv[3], "r");
+        if(file != NULL){
+            encryption(argv[2],file);
+            fclose(file);
+        }
+        else{
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
     else {
         printf("Usge: FHEv1 -k <key size> <KeyFileName>\n");
+        printf("Usge: FHEv1 -e <m> <KeyFileName>\n");
+        return EXIT_FAILURE;
     }
+    
     return EXIT_SUCCESS;
 }

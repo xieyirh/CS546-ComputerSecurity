@@ -113,6 +113,7 @@ void keyGen(size_t keySize, char* keyFile){
     if (file == NULL){
         exit(EXIT_FAILURE);
     }
+    fprintf(file, "%zu\n", keySize); //save keysize
     writePrimeHexStringToFile(p1, file);
     writePrimeHexStringToFile(p2, file);
     writePrimeHexStringToFile(p3, file);
@@ -165,4 +166,54 @@ void keyGen(size_t keySize, char* keyFile){
     bdFree(&t);
     
     return;
+}
+
+void encryption(char* message, FILE* keyFile){
+    BIGD m, c, p1, n;
+    m = bdNew();
+    c = bdNew();
+    p1 = bdNew();
+    n = bdNew();
+    bdConvFromDecimal(m, message);
+
+    char* keySizeLine = NULL;
+    char* p1Line = NULL;
+    char* tempLine = NULL;
+    char* nLine = NULL;
+    size_t len = 0;
+    getline(&keySizeLine, &len, keyFile); 
+    getline(&p1Line, &len, keyFile);
+    size_t keySize = atoi(keySizeLine);
+    bdConvFromHex(p1, p1Line);
+    if(bdCompare(m,p1) > 0){
+        printf("Message must be less than the decrytion key p1\n");
+        return ;
+    }
+
+    for(int i= 0; i < 5; i++){ //jump to the N number line, N is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&nLine, &len, keyFile);
+    bdConvFromHex(n, nLine);
+
+    BIGD r = bdNew();
+    bdRandomBits(r,keySize);
+    
+    BIGD temp = bdNew();
+    bdMultiply_s(temp, r, p1);
+    bdAdd_s(temp,temp, m);
+    bdModulo_s(c, temp,n);
+    char* cypher = NULL;
+    size_t nchars = bdConvToDecimal(c, NULL, 0);
+    cypher = malloc(nchars+1); 
+    bdConvToDecimal(c,cypher, nchars+1);
+    /* printf("keySize=%zu\n",keySize);
+    bdPrint(p1, 0x1);
+    bdPrint(n, 0x1);
+    bdPrint(c, 0x1); */
+    printf("Plaintext = %s\n",message);
+    printf("Cyphertext = %s\n",cypher);
+    
+
+    
 }
