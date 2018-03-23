@@ -54,24 +54,28 @@ void keyGen(size_t keySize, char* keyFile){
 
     printf("The prime number p1 = ");
     bdPrint(p1, 0x1);
-    printf("The size of p1 is:%ld\n",bdSizeof(p1) );
+    printf("The size of p1 is:%ld\n",bdBitLength(p1) );
 
     printf("The prime number p2 = ");
     bdPrint(p2, 0x1);
-    printf("The size of p2 is:%ld\n",bdSizeof(p2) );
+    printf("The size of p2 is:%ld\n",bdBitLength(p2) );
 
     printf("The prime number p3 = ");
     bdPrint(p3, 0x1);
-    printf("The size of p3 is:%ld\n",bdSizeof(p3) );
+    printf("The size of p3 is:%ld\n",bdBitLength(p3) );
     printf("The prime number q = ");
     bdPrint(q, 0x1);
-    printf("The size of q is:%ld\n",bdSizeof(q) );
+    printf("The size of q is:%ld\n",bdBitLength(q) );
 
     printf("The number n = ");
     bdPrint(n, 0x1);
+    printf("The size of n is:%ld\n",bdBitLength(n) );
+    
 
     printf("The number t = ");
     bdPrint(t, 0x1);
+    printf("The size of t is:%ld\n",bdBitLength(t) );
+    
     
 
     bdFree(&p1);
