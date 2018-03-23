@@ -211,9 +211,38 @@ void encryption(char* message, FILE* keyFile){
     bdPrint(p1, 0x1);
     bdPrint(n, 0x1);
     bdPrint(c, 0x1); */
-    printf("Plaintext = %s\n",message);
     printf("Cyphertext = %s\n",cypher);
-    
+    free(cypher);
+    free(tempLine);
+    free(p1Line);
+    free(nLine);
+}
 
-    
+void decryption(char* cypherText,FILE* keyFile){
+    BIGD c, p1;
+    c = bdNew();
+    p1 = bdNew();
+    bdConvFromDecimal(c, cypherText);
+
+    char* p1Line =NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    getline(&tempLine, &len, keyFile); 
+    getline(&p1Line, &len, keyFile);
+    bdConvFromHex(p1,p1Line);
+
+    BIGD m;
+    m = bdNew();
+    bdModulo_s(m, c, p1);
+
+    char* message = NULL;
+    size_t nchars = bdConvToDecimal(m, NULL, 0);
+    message = malloc(nchars+1); 
+    bdConvToDecimal(m,message, nchars+1);
+
+    printf("plaintext = %s\n",message);
+    free(message);
+    free(tempLine);
+    free(p1Line);
 }
