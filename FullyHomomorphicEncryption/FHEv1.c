@@ -12,7 +12,8 @@ int main(int argc, char* argv[]){
     else if (argc == 4 && strcmp(argv[1],"-e")== 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
-            encryption(argv[2],file);
+            char* cypherText = NULL;
+            cypherText = encryption(argv[2],file);
             fclose(file);
         }
         else{
@@ -31,10 +32,24 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
         }
     }
+    else if(argc == 4 && strcmp(argv[1],"-b") == 0 ){
+        FILE* file = fopen(argv[3], "r");
+        if(file != NULL){
+            printf("Input message = %s\n", argv[2]);
+            encrDecryption(argv[2],file);
+            fclose(file);
+        }
+        else{
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
     else {
         printf("Usge: FHEv1 -k <key size> <KeyFileName>\n");
         printf("Usge: FHEv1 -e <m> <KeyFileName>\n");
         printf("Usge: FHEv1 -d <Cm> <KeyFileName>\n");
+        printf("Usge: FHEv1 -b <m> <KeyFileName>\n");
+        
         
         return EXIT_FAILURE;
     }

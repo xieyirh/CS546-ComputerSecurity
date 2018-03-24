@@ -167,8 +167,13 @@ void keyGen(size_t keySize, char* keyFile){
     
     return;
 }
-
-void encryption(char* message, FILE* keyFile){
+/**
+ * Encrypt the message by using pregenerated key
+ * @param message: plaintext which should be smaller than p1
+ * @param keyFile: keyFile pointer
+ * @return cypher text
+ */ 
+char* encryption(char* message, FILE* keyFile){
     BIGD m, c, p1, n;
     m = bdNew();
     c = bdNew();
@@ -180,6 +185,7 @@ void encryption(char* message, FILE* keyFile){
     char* p1Line = NULL;
     char* tempLine = NULL;
     char* nLine = NULL;
+    char* cypher = NULL;
     size_t len = 0;
     getline(&keySizeLine, &len, keyFile); 
     getline(&p1Line, &len, keyFile);
@@ -187,7 +193,7 @@ void encryption(char* message, FILE* keyFile){
     bdConvFromHex(p1, p1Line);
     if(bdCompare(m,p1) > 0){
         printf("Message must be less than the decrytion key p1\n");
-        return ;
+        return NULL;
     }
 
     for(int i= 0; i < 5; i++){ //jump to the N number line, N is at the 8th line of the keyFile
@@ -203,27 +209,28 @@ void encryption(char* message, FILE* keyFile){
     bdMultiply_s(temp, r, p1);
     bdAdd_s(temp,temp, m);
     bdModulo_s(c, temp,n);
-    char* cypher = NULL;
     size_t nchars = bdConvToDecimal(c, NULL, 0);
     cypher = malloc(nchars+1); 
     bdConvToDecimal(c,cypher, nchars+1);
-    /* printf("keySize=%zu\n",keySize);
-    bdPrint(p1, 0x1);
-    bdPrint(n, 0x1);
-    bdPrint(c, 0x1); */
+
     printf("Cyphertext = %s\n",cypher);
-    free(cypher);
     free(tempLine);
     free(p1Line);
     free(nLine);
+    rewind(keyFile);
+    return cypher;
 }
 
+/**
+ * Decrypte the cypher text
+ * @param cypherText
+ * @param keyFile: key file pointer
+ */ 
 void decryption(char* cypherText,FILE* keyFile){
     BIGD c, p1;
     c = bdNew();
     p1 = bdNew();
     bdConvFromDecimal(c, cypherText);
-
     char* p1Line =NULL;
     char* tempLine = NULL;
     size_t len = 0;
@@ -241,8 +248,21 @@ void decryption(char* cypherText,FILE* keyFile){
     message = malloc(nchars+1); 
     bdConvToDecimal(m,message, nchars+1);
 
-    printf("plaintext = %s\n",message);
+    printf("Plaintext = %s\n",message);
+    rewind(keyFile);
     free(message);
     free(tempLine);
     free(p1Line);
+}
+
+/**
+ * Read key from key file and then do encryption, decryption
+ * @param message: plaintext
+ * @param file: key file pointer
+ */ 
+void encrDecryption(char* message,FILE* file){
+    char* cypherText;
+    cypherText = encryption(message, file);
+    decryption(cypherText, file);
+    free(cypherText);
 }
