@@ -328,3 +328,55 @@ void messageAddition(char* message1, char* message2, FILE* keyFile ){
     free(cipher2);
 
 }
+//
+void cipherMultiplication(char* cipher1, char* cipher2, FILE* keyFile){
+    BIGD c1,c2, n;
+    c1 = bdNew();
+    c2 = bdNew();
+    n = bdNew();
+    bdConvFromDecimal(c1, cipher1);
+    bdConvFromDecimal(c2, cipher2);
+    
+    char* nLine =NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    for(int i= 0; i < 7; i++){ //jump to the N number line, N is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&nLine, &len, keyFile);
+    bdConvFromHex(n, nLine);
+    //bdPrint(n, 0x1);
+
+    BIGD temp, mul;
+    temp = bdNew();
+    mul = bdNew();
+    bdMultiply_s(temp, c1, c2);
+    bdModulo_s(mul, temp, n);
+    char* cipherMul = NULL;
+    size_t nchars = bdConvToDecimal(mul, NULL, 0);
+    cipherMul = malloc(nchars+1); 
+    bdConvToDecimal(mul,cipherMul, nchars+1);
+
+    printf("cipher Muliplication = %s\n",cipherMul);
+    rewind(keyFile);
+    bdFree(&temp);
+    bdFree(&mul);
+    bdFree(&c1);
+    bdFree(&c2);
+    bdFree(&n);
+    free(cipherMul);
+    free(nLine);
+    free(tempLine);
+}
+
+void messageMultiplication(char* message1, char* message2, FILE* keyFile ){
+    char* cipher1;
+    char* cipher2;
+    cipher1 = encryption(message1, keyFile);
+    cipher2 = encryption(message2, keyFile);
+    cipherMultiplication(cipher1, cipher2, keyFile);
+    free(cipher1);
+    free(cipher2);
+
+}

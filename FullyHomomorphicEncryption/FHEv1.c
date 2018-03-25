@@ -66,12 +66,35 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
         }
     }
+    else if(argc == 5 && strcmp(argv[1],"-m") == 0){
+        FILE * file = fopen(argv[4], "r");
+        if(file != NULL){
+            cipherMultiplication(argv[2], argv[3], file);
+            fclose(file);
+        }
+        else {
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
+     else if(argc == 7 && strcmp(argv[1],"-m") == 0 && strcmp(argv[2],"-e")== 0 && strcmp(argv[4], "-e")== 0 ){
+        FILE * file = fopen(argv[6], "r");
+        if(file != NULL){
+            messageMultiplication(argv[3], argv[5], file);
+            fclose(file);
+        }
+        else {
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
     else {
         printf("Usage: FHEv1 -k <key size> <KeyFileName>\n");
         printf("Usage: FHEv1 -e <m> <KeyFileName>\n");
         printf("Usage: FHEv1 -d <Cm> <KeyFileName>\n");
         printf("Usage: FHEv1 -b <m> <KeyFileName>\n");
-        printf("Usage: FHEV1 -a <-e<m1>|<Cm1>,<-e <m2> | <Cm2> <keyFileName>");
+        printf("Usage: FHEV1 -a <-e <m1> | <Cm1>,<-e <m2> | <Cm2> <keyFileName>");
+        printf("Usage: FHEV1 -m <-e <m1> | <Cm1>,<-e <m2> | <Cm2> <keyFileName>");
         
         
         return EXIT_FAILURE;

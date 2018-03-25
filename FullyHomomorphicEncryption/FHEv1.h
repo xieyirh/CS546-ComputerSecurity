@@ -17,3 +17,5 @@ void decryption(char* cipherText,FILE* keyFile);
 void encrDecryption(char* message,FILE* file);
 void messageAddition(char*, char*, FILE* );
 void cipherAddition(char*,  char*, FILE*);
+void messageMultiplication(char*, char*, FILE* );
+void cipherMultiplication(char*,  char*, FILE*);
