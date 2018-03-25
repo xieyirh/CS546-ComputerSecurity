@@ -13,5 +13,7 @@
 **/
 void keyGen(size_t keySize, char* keyFile);
 char* encryption(char* message, FILE* keyFile);
-void decryption(char* cypherText,FILE* keyFile);
+void decryption(char* cipherText,FILE* keyFile);
 void encrDecryption(char* message,FILE* file);
+void messageAddition(char*, char*, FILE* );
+void cipherAddition(char*,  char*, FILE*);

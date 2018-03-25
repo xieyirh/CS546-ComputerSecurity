@@ -12,8 +12,8 @@ int main(int argc, char* argv[]){
     else if (argc == 4 && strcmp(argv[1],"-e")== 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
-            char* cypherText = NULL;
-            cypherText = encryption(argv[2],file);
+            char* cipherText = NULL;
+            cipherText = encryption(argv[2],file);
             fclose(file);
         }
         else{
@@ -44,11 +44,34 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
         }
     }
+    else if(argc == 5 && strcmp(argv[1],"-a") == 0){
+        FILE * file = fopen(argv[4], "r");
+        if(file != NULL){
+            cipherAddition(argv[2], argv[3], file);
+            fclose(file);
+        }
+        else {
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
+     else if(argc == 7 && strcmp(argv[1],"-a") == 0 && strcmp(argv[2],"-e")== 0 && strcmp(argv[4], "-e")== 0 ){
+        FILE * file = fopen(argv[6], "r");
+        if(file != NULL){
+            messageAddition(argv[3], argv[5], file);
+            fclose(file);
+        }
+        else {
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
     else {
-        printf("Usge: FHEv1 -k <key size> <KeyFileName>\n");
-        printf("Usge: FHEv1 -e <m> <KeyFileName>\n");
-        printf("Usge: FHEv1 -d <Cm> <KeyFileName>\n");
-        printf("Usge: FHEv1 -b <m> <KeyFileName>\n");
+        printf("Usage: FHEv1 -k <key size> <KeyFileName>\n");
+        printf("Usage: FHEv1 -e <m> <KeyFileName>\n");
+        printf("Usage: FHEv1 -d <Cm> <KeyFileName>\n");
+        printf("Usage: FHEv1 -b <m> <KeyFileName>\n");
+        printf("Usage: FHEV1 -a <-e<m1>|<Cm1>,<-e <m2> | <Cm2> <keyFileName>");
         
         
         return EXIT_FAILURE;

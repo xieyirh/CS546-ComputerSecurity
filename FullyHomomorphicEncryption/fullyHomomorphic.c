@@ -171,7 +171,7 @@ void keyGen(size_t keySize, char* keyFile){
  * Encrypt the message by using pregenerated key
  * @param message: plaintext which should be smaller than p1
  * @param keyFile: keyFile pointer
- * @return cypher text
+ * @return cipher text
  */ 
 char* encryption(char* message, FILE* keyFile){
     BIGD m, c, p1, n;
@@ -185,7 +185,7 @@ char* encryption(char* message, FILE* keyFile){
     char* p1Line = NULL;
     char* tempLine = NULL;
     char* nLine = NULL;
-    char* cypher = NULL;
+    char* cipher = NULL;
     size_t len = 0;
     getline(&keySizeLine, &len, keyFile); 
     getline(&p1Line, &len, keyFile);
@@ -210,27 +210,33 @@ char* encryption(char* message, FILE* keyFile){
     bdAdd_s(temp,temp, m);
     bdModulo_s(c, temp,n);
     size_t nchars = bdConvToDecimal(c, NULL, 0);
-    cypher = malloc(nchars+1); 
-    bdConvToDecimal(c,cypher, nchars+1);
+    cipher = malloc(nchars+1); 
+    bdConvToDecimal(c,cipher, nchars+1);
 
-    printf("Cyphertext = %s\n",cypher);
+    printf("ciphertext = %s\n",cipher);
     free(tempLine);
     free(p1Line);
     free(nLine);
     rewind(keyFile);
-    return cypher;
+    bdFree(&r);
+    bdFree(&temp);
+    bdFree(&m);
+    bdFree(&c);
+    bdFree(&n);
+    bdFree(&p1);
+    return cipher;
 }
 
 /**
- * Decrypte the cypher text
- * @param cypherText
+ * Decrypte the cipher text
+ * @param cipherText
  * @param keyFile: key file pointer
  */ 
-void decryption(char* cypherText,FILE* keyFile){
+void decryption(char* cipherText,FILE* keyFile){
     BIGD c, p1;
     c = bdNew();
     p1 = bdNew();
-    bdConvFromDecimal(c, cypherText);
+    bdConvFromDecimal(c, cipherText);
     char* p1Line =NULL;
     char* tempLine = NULL;
     size_t len = 0;
@@ -253,6 +259,10 @@ void decryption(char* cypherText,FILE* keyFile){
     free(message);
     free(tempLine);
     free(p1Line);
+    bdFree(&c);
+    bdFree(&p1);
+    bdFree(&m);
+
 }
 
 /**
@@ -261,8 +271,60 @@ void decryption(char* cypherText,FILE* keyFile){
  * @param file: key file pointer
  */ 
 void encrDecryption(char* message,FILE* file){
-    char* cypherText;
-    cypherText = encryption(message, file);
-    decryption(cypherText, file);
-    free(cypherText);
+    char* cipherText;
+    cipherText = encryption(message, file);
+    decryption(cipherText, file);
+    free(cipherText);
+}
+
+void cipherAddition(char* cipher1, char* cipher2, FILE* keyFile){
+    BIGD c1,c2, n;
+    c1 = bdNew();
+    c2 = bdNew();
+    n = bdNew();
+    bdConvFromDecimal(c1, cipher1);
+    bdConvFromDecimal(c2, cipher2);
+    
+    char* nLine =NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    for(int i= 0; i < 7; i++){ //jump to the N number line, N is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&nLine, &len, keyFile);
+    bdConvFromHex(n, nLine);
+    //bdPrint(n, 0x1);
+
+    BIGD temp, addition;
+    temp = bdNew();
+    addition = bdNew();
+    bdAdd_s(temp, c1, c2);
+    bdModulo_s(addition, temp, n);
+    char* cipherAddition = NULL;
+    size_t nchars = bdConvToDecimal(addition, NULL, 0);
+    cipherAddition = malloc(nchars+1); 
+    bdConvToDecimal(addition,cipherAddition, nchars+1);
+
+    printf("cipher addition = %s\n",cipherAddition);
+    rewind(keyFile);
+    bdFree(&temp);
+    bdFree(&addition);
+    bdFree(&c1);
+    bdFree(&c2);
+    bdFree(&n);
+    free(cipherAddition);
+    free(nLine);
+    free(tempLine);
+}
+
+void messageAddition(char* message1, char* message2, FILE* keyFile ){
+    char* cipher1;
+    char* cipher2;
+    cipher1 = encryption(message1, keyFile);
+    cipher2 = encryption(message2, keyFile);
+    cipherAddition(cipher1, cipher2, keyFile);
+    free(cipher1);
+    free(cipher2);
+
 }
