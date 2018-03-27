@@ -19,3 +19,5 @@ void messageAddition(char*, char*, FILE* );
 void cipherAddition(char*,  char*, FILE*);
 void messageMultiplication(char*, char*, FILE* );
 void cipherMultiplication(char*,  char*, FILE*);
+int messageEqualityTest(char*, char*, FILE*);
+int cipherEqualityTest(char*, char*, FILE*);

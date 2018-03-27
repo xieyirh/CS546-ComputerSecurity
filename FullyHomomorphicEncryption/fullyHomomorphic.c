@@ -380,3 +380,90 @@ void messageMultiplication(char* message1, char* message2, FILE* keyFile ){
     free(cipher2);
 
 }
+
+int cipherEqualityTest(char* cipher1, char* cipher2, FILE* keyFile){
+    BIGD c1,c2, t, g1, g2;
+    c1 = bdNew();
+    c2 = bdNew();
+    t = bdNew();
+    g1 = bdNew();
+    g2 = bdNew();
+    bdConvFromDecimal(c1, cipher1);
+    bdConvFromDecimal(c2, cipher2);
+    
+    char* tLine =NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    for(int i= 0; i < 7; i++){ //jump to the t number line, t is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&tLine, &len, keyFile);
+    bdConvFromHex(t, tLine);
+    rewind(keyFile);
+
+    char* g1Line = NULL;
+    char* g2Line = NULL;
+    tempLine = NULL;
+    len = 0;
+
+    for(int i= 0; i < 5; i++){ //jump to the g1 number line, N is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&g1Line, &len, keyFile);
+    getline(&g2Line, &len, keyFile);
+    bdConvFromHex(g1, g1Line);
+    bdConvFromHex(g2, g2Line);
+   
+   BIGD exp = bdNew();
+   if(bdCompare(c1, c2) >= 0){
+       bdSubtract_s(exp, c1, c2);
+   }
+   else {
+       bdSubtract_s(exp, c2, c1);
+   }
+   //bdPrint(exp, 0x1);
+   BIGD result1, result2, bigOne;
+   result1 = bdNew();
+   result2 = bdNew();
+   bigOne = bdNew();
+   bdSetShort(bigOne, 1);
+  // bdPrint(bigOne, 0x1);
+
+   bdModExp(result1, g1, exp, t);
+   bdModExp(result2, g2, exp, t);
+   
+   //bdPrint(result1, 0x1);
+   //bdPrint(result2, 0x1);
+   if(bdIsEqual(result1, bigOne) && bdIsEqual(result2, bigOne)){
+       return 1;
+   }
+   else{
+       return 0;
+   }
+   rewind(keyFile);
+   bdFree(&result1);
+   bdFree(&result2);
+   bdFree(&t);
+   bdFree(&c1);
+   bdFree(&c2);
+   bdFree(&bigOne);
+   bdFree(&g1);
+   bdFree(&g2);
+   bdFree(&exp);
+   free(tLine);
+   free(tempLine);
+   free(g1Line);
+   free(g2Line);
+}
+
+int messageEqualityTest(char* message1, char* message2, FILE* keyFile){
+    char* cipher1;
+    char* cipher2;
+    cipher1 = encryption(message1, keyFile);
+    cipher2 = encryption(message2, keyFile);
+    int result =  cipherEqualityTest(cipher1, cipher2, keyFile);
+    free(cipher1);
+    free(cipher2);
+    return result;
+}
