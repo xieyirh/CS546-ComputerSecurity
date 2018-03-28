@@ -495,12 +495,25 @@ int messageEqualityTest(char* message1, char* message2, FILE* keyFile){
     return result;
 }
 
-char* messagePadding(char* message, size_t w,  size_t z){
+char* messagePadding(char* message, FILE* keyFile){
     BIGD m, r, rShift, m1;
     m = bdNew();
     m1 = bdNew();
     r = bdNew();
     rShift = bdNew();
+    char* wLine = NULL;
+    char* zLine = NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    for(int i= 0; i < 9; i++){ //jump to the w number line, t is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&wLine, &len, keyFile);
+    getline(&zLine, &len, keyFile);
+    size_t w = atoi(wLine);
+    size_t z = atoi(zLine);
+    printf("w=%ld, z=%ld\n",w, z);
     bdRandomBits(r, z );
     char* paddedMessage;
     bdConvFromDecimal(m, message);
@@ -509,6 +522,7 @@ char* messagePadding(char* message, size_t w,  size_t z){
     size_t nchars = bdConvToDecimal(m1, NULL, 0);
     paddedMessage = malloc(nchars+1); 
     bdConvToDecimal(m1,paddedMessage, nchars+1);
+    rewind(keyFile);
     return paddedMessage;
 }
 
@@ -534,9 +548,9 @@ void keyGenV2(size_t keySize, size_t w, size_t z, char* keyFile){
     }
     genPrimeV2(p2,keySize, w, z);
     genPrimeV2(p3,keySize, w, z);
-    bdPrint(p1, 0x1);
+    /* bdPrint(p1, 0x1);
     bdPrint(p2, 0x1);
-    bdPrint(p3, 0x1); 
+    bdPrint(p3, 0x1);  */
     
     BIGD n, t;
     n = bdNew();
@@ -556,8 +570,7 @@ void keyGenV2(size_t keySize, size_t w, size_t z, char* keyFile){
         exit(EXIT_FAILURE);
     }
     fprintf(file, "%zu\n", keySize); //save keysize
-    printf("p1 again\n");
-    bdPrint(p1, 0x1);
+   
     writePrimeHexStringToFile(p1, file);
     writePrimeHexStringToFile(p2, file);
     writePrimeHexStringToFile(p3, file);

@@ -11,6 +11,19 @@ int main(int argc, char* argv[]){
         size_t z = atoi(argv[4]);
         keyGenV2(keySize, w, z, argv[5]);
     }
+    if(argc == 4 && strcmp(argv[1], "-p")== 0){
+        char* paddedMessage = NULL;
+        FILE* file = fopen(argv[3], "r");
+        if(file != NULL){
+            paddedMessage = messagePadding(argv[2], file);
+            printf("Padded Message: %s\n",paddedMessage);
+            fclose(file);
+        }
+        else{
+            printf("Opening key file fails! User may need generate key file first.\n");
+            return EXIT_FAILURE;
+        }
+    }
    /*  else if (argc == 4 && strcmp(argv[1],"-e")== 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
@@ -124,6 +137,8 @@ int main(int argc, char* argv[]){
     } */
     else {
         printf("Usage: FHEv2 -k <key size> <w> <z> <KeyFileName>\n");
+        printf("Usage: FHEv2 -p <m> <KeyFileName>\n");
+        
         /* printf("Usage: FHEv1 -e <m> <KeyFileName>\n");
         printf("Usage: FHEv1 -d <Cm> <KeyFileName>\n");
         printf("Usage: FHEv1 -b <m> <KeyFileName>\n");
