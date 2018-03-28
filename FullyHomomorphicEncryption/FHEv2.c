@@ -4,12 +4,14 @@
 #include "FHEv1.h"
 
 int main(int argc, char* argv[]){
-    if (argc == 4 && strcmp(argv[1], "-k") == 0){
+    if (argc == 6 && strcmp(argv[1], "-k") == 0){
         size_t keySize = 0;
         keySize = atoi(argv[2]);
-        keyGen(keySize, argv[3]);
+        size_t w = atoi(argv[3]);
+        size_t z = atoi(argv[4]);
+        keyGenV2(keySize, w, z, argv[5]);
     }
-    else if (argc == 4 && strcmp(argv[1],"-e")== 0){
+   /*  else if (argc == 4 && strcmp(argv[1],"-e")== 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
             char* cipherText = NULL;
@@ -119,16 +121,16 @@ int main(int argc, char* argv[]){
             printf("Opening key file fails! User may need generate key file first.\n");
             return EXIT_FAILURE;
         }
-    }
+    } */
     else {
-        printf("Usage: FHEv1 -k <key size> <KeyFileName>\n");
-        printf("Usage: FHEv1 -e <m> <KeyFileName>\n");
+        printf("Usage: FHEv2 -k <key size> <w> <z> <KeyFileName>\n");
+        /* printf("Usage: FHEv1 -e <m> <KeyFileName>\n");
         printf("Usage: FHEv1 -d <Cm> <KeyFileName>\n");
         printf("Usage: FHEv1 -b <m> <KeyFileName>\n");
         printf("Usage: FHEV1 -a <-e <m1> | <Cm1>,<-e <m2> | <Cm2> <keyFileName>\n");
         printf("Usage: FHEV1 -m <-e <m1> | <Cm1>,<-e <m2> | <Cm2> <keyFileName>\n");
         printf("Usage: FHEV1 -t <-e <m1> | <Cm1>,<-e <m2> | <Cm2> <keyFileName>\n");
-        
+         */
         
         
         return EXIT_FAILURE;

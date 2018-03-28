@@ -21,3 +21,5 @@ void messageMultiplication(char*, char*, FILE* );
 void cipherMultiplication(char*,  char*, FILE*);
 int messageEqualityTest(char*, char*, FILE*);
 int cipherEqualityTest(char*, char*, FILE*);
+char* messagePadding(char*, size_t, size_t );
+void keyGenV2(size_t, size_t, size_t, char*);

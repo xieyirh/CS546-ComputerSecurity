@@ -23,6 +23,25 @@ void genPrime(BIGD p, size_t keySize){
         bdRandomBits(p, keySize);
     }
 }
+
+void genPrimeV2(BIGD p, size_t keySize,size_t w, size_t z ){
+    bdRandomBits(p,2* (keySize + 1) * (w + z));
+    while(bdBitLength(p) < (keySize + 1) *(w + z)){
+        bdRandomBits(p,2* (keySize + 1) * (w + z));
+    }
+    //bdPrint(p, 0x1);
+    //printf("The size of p is:%ld\n",bdBitLength(p) );
+    while(!bdIsEven(p)){
+        bdSetZero(p);
+        bdRandomBits(p,2* (keySize + 1) * (w + z));
+    }
+
+    size_t ntests = 80; //The count of Rabin-miller primality tests to carry out 
+    while(!bdIsPrime(p, ntests)){
+        bdSetZero(p);
+        bdRandomBits(p, 2* (keySize + 1) * (w + z));
+    }
+}
 /**
  * write the prime number to a file
  * @param p: prime number
@@ -30,9 +49,12 @@ void genPrime(BIGD p, size_t keySize){
  */ 
 void writePrimeHexStringToFile(BIGD p, FILE* file){
     char* primeString;
+   // printf("inside write to file\n");
+  //  bdPrint(p, 0x1);
     size_t nChars = bdConvToHex(p,NULL, 0);
     primeString = malloc(nChars + 1);
     bdConvToHex(p, primeString,nChars + 1);
+    //printf("write to file %s\n", primeString);
     fputs(primeString,file);
     fputs("\n", file);
     free(primeString);
@@ -95,6 +117,11 @@ void keyGen(size_t keySize, char* keyFile){
     }
     genPrime(p2,keySize);
     genPrime(p3,keySize);
+
+    /* bdPrint(p1, 0x1);
+    bdPrint(p2, 0x1);
+    bdPrint(p3, 0x1); */
+    
     
     BIGD n, t;
     n = bdNew();
@@ -466,4 +493,122 @@ int messageEqualityTest(char* message1, char* message2, FILE* keyFile){
     free(cipher1);
     free(cipher2);
     return result;
+}
+
+char* messagePadding(char* message, size_t w,  size_t z){
+    BIGD m, r, rShift, m1;
+    m = bdNew();
+    m1 = bdNew();
+    r = bdNew();
+    rShift = bdNew();
+    bdRandomBits(r, z );
+    char* paddedMessage;
+    bdConvFromDecimal(m, message);
+    bdShiftLeft(rShift, r, w);
+    bdOrBits(m1, r, m);
+    size_t nchars = bdConvToDecimal(m1, NULL, 0);
+    paddedMessage = malloc(nchars+1); 
+    bdConvToDecimal(m1,paddedMessage, nchars+1);
+    return paddedMessage;
+}
+
+void keyGenV2(size_t keySize, size_t w, size_t z, char* keyFile){
+    BIGD p1, p2, p3, q, bigTwo;
+    p1 = bdNew();
+    p2 = bdNew();
+    p3 = bdNew();
+    q = bdNew();
+    bigTwo = bdNew();
+    size_t ntests = 80; //The count of Rabin-miller primality tests to carry out
+    bdSetShort(bigTwo, 2);
+    
+    genPrimeV2(p1,keySize, w, z);
+    //bdPrint(p1, 0x1);
+    bdMultiply_s(q, p1, bigTwo);
+    bdIncrement(q);
+    
+    while(!bdIsPrime(q, ntests)){
+        genPrimeV2(p1,keySize, w, z);
+        bdMultiply_s(q, p1, bigTwo);
+        bdIncrement(q);
+    }
+    genPrimeV2(p2,keySize, w, z);
+    genPrimeV2(p3,keySize, w, z);
+    bdPrint(p1, 0x1);
+    bdPrint(p2, 0x1);
+    bdPrint(p3, 0x1); 
+    
+    BIGD n, t;
+    n = bdNew();
+    t = bdNew();
+    bdMultiply_s(n, p1,p2);
+    bdMultiply_s(t, q, p3);
+
+    BIGD g1, g2;
+    g1 = bdNew();
+    g2 = bdNew();
+    genEqualityTestKey(g1, p3, t, keySize);
+    genEqualityTestKey(g2, p3, t, keySize);
+    
+
+    FILE* file = fopen(keyFile, "w+");
+    if (file == NULL){
+        exit(EXIT_FAILURE);
+    }
+    fprintf(file, "%zu\n", keySize); //save keysize
+    printf("p1 again\n");
+    bdPrint(p1, 0x1);
+    writePrimeHexStringToFile(p1, file);
+    writePrimeHexStringToFile(p2, file);
+    writePrimeHexStringToFile(p3, file);
+    writePrimeHexStringToFile(q, file);
+    writePrimeHexStringToFile(g1, file);
+    writePrimeHexStringToFile(g2, file);
+    writePrimeHexStringToFile(n, file);
+    writePrimeHexStringToFile(t, file);
+    fprintf(file, "%zu\n", w); //save w
+    fprintf(file, "%zu\n", z); //save z
+
+    fclose(file);
+/*
+    printf("The prime number p1 = ");
+    bdPrint(p1, 0x1);
+    //printf("The size of p1 is:%ld\n",bdBitLength(p1) );
+
+    printf("The prime number p2 = ");
+    bdPrint(p2, 0x1);
+    //printf("The size of p2 is:%ld\n",bdBitLength(p2) );
+
+    printf("The prime number p3 = ");
+    bdPrint(p3, 0x1);
+    //printf("The size of p3 is:%ld\n",bdBitLength(p3) );
+    printf("The prime number q = ");
+    bdPrint(q, 0x1);
+    //printf("The size of q is:%ld\n",bdBitLength(q) );
+
+    printf("The prime number g1 = ");
+    bdPrint(g1, 0x1);
+    //printf("The size of g1 is:%ld\n",bdBitLength(g1) );
+
+    printf("The prime number g2 = ");
+    bdPrint(g2, 0x1);
+    //printf("The size of g2 is:%ld\n",bdBitLength(g2) );
+
+    printf("The number n = ");
+    bdPrint(n, 0x1);
+    //printf("The size of n is:%ld\n",bdBitLength(n) );
+
+    printf("The number t = ");
+    bdPrint(t, 0x1);
+    //printf("The size of t is:%ld\n",bdBitLength(t) ); 
+*/
+    bdFree(&p1);
+    bdFree(&p2);
+    bdFree(&p3);
+    bdFree(&q);
+    bdFree(&bigTwo);
+    bdFree(&n);
+    bdFree(&t);
+    
+    return;
 }
