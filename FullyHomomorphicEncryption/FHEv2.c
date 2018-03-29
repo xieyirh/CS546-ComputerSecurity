@@ -11,12 +11,13 @@ int main(int argc, char* argv[]){
         size_t z = atoi(argv[4]);
         keyGenV2(keySize, w, z, argv[5]);
     }
-    if(argc == 4 && strcmp(argv[1], "-p")== 0){
+    else if(argc == 4 && strcmp(argv[1], "-p")== 0){
         char* paddedMessage = NULL;
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
             paddedMessage = messagePadding(argv[2], file);
             printf("Padded Message: %s\n",paddedMessage);
+            free(paddedMessage);
             fclose(file);
         }
         else{
@@ -24,11 +25,13 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
         }
     }
-   /*  else if (argc == 4 && strcmp(argv[1],"-e")== 0){
+    else if (argc == 4 && strcmp(argv[1],"-e")== 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
             char* cipherText = NULL;
-            cipherText = encryption(argv[2],file);
+            cipherText = encryption(messagePadding(argv[2],file), file);
+            printf("ciphertext = %s\n",cipherText);
+            free(cipherText);
             fclose(file);
         }
         else{
@@ -39,7 +42,8 @@ int main(int argc, char* argv[]){
     else if(argc == 4 && strcmp(argv[1], "-d") == 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
-            decryption(argv[2],file);
+            char* message = decryptionV2(argv[2],file);
+            printf("Plaintext = %s\n",message);
             fclose(file);
         }
         else{
@@ -47,7 +51,7 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
         }
     }
-    else if(argc == 4 && strcmp(argv[1],"-b") == 0 ){
+   /* else if(argc == 4 && strcmp(argv[1],"-b") == 0 ){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
             printf("Input message = %s\n", argv[2]);

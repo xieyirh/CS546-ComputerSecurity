@@ -240,7 +240,7 @@ char* encryption(char* message, FILE* keyFile){
     cipher = malloc(nchars+1); 
     bdConvToDecimal(c,cipher, nchars+1);
 
-    printf("ciphertext = %s\n",cipher);
+   
     free(tempLine);
     free(p1Line);
     free(nLine);
@@ -259,7 +259,7 @@ char* encryption(char* message, FILE* keyFile){
  * @param cipherText
  * @param keyFile: key file pointer
  */ 
-void decryption(char* cipherText,FILE* keyFile){
+char* decryption(char* cipherText,FILE* keyFile){
     BIGD c, p1;
     c = bdNew();
     p1 = bdNew();
@@ -281,14 +281,15 @@ void decryption(char* cipherText,FILE* keyFile){
     message = malloc(nchars+1); 
     bdConvToDecimal(m,message, nchars+1);
 
-    printf("Plaintext = %s\n",message);
+    //printf("Plaintext = %s\n",message);
     rewind(keyFile);
-    free(message);
+//    free(message);
     free(tempLine);
     free(p1Line);
     bdFree(&c);
     bdFree(&p1);
     bdFree(&m);
+    return message;
 
 }
 
@@ -298,10 +299,8 @@ void decryption(char* cipherText,FILE* keyFile){
  * @param file: key file pointer
  */ 
 void encrDecryption(char* message,FILE* file){
-    char* cipherText;
-    cipherText = encryption(message, file);
-    decryption(cipherText, file);
-    free(cipherText);
+    printf("Cipher Text = %s\n", encryption(message, file));
+    printf("Plaintext = %s\n",decryption(encryption(message, file), file));
 }
 
 void cipherAddition(char* cipher1, char* cipher2, FILE* keyFile){
@@ -513,7 +512,7 @@ char* messagePadding(char* message, FILE* keyFile){
     getline(&zLine, &len, keyFile);
     size_t w = atoi(wLine);
     size_t z = atoi(zLine);
-    printf("w=%ld, z=%ld\n",w, z);
+    //printf("w=%ld, z=%ld\n",w, z);
     bdRandomBits(r, z );
     char* paddedMessage;
     bdConvFromDecimal(m, message);
@@ -624,4 +623,43 @@ void keyGenV2(size_t keySize, size_t w, size_t z, char* keyFile){
     bdFree(&t);
     
     return;
+}
+char* decryptionV2(char* cipher, FILE* keyFile){
+    char* paddedMessage = decryption(cipher, keyFile);
+    BIGD pm = bdNew();
+    bdConvFromDecimal(pm, paddedMessage);
+    
+    BIGD m = bdNew();
+
+    char* wLine = NULL;
+    char* tempLine = NULL;
+    size_t len = 0;
+
+    for(int i= 0; i < 9; i++){ //jump to the w number line, t is at the 8th line of the keyFile
+        getline(&tempLine, &len, keyFile);
+    }
+    getline(&wLine, &len, keyFile);
+    size_t w = atoi(wLine);
+
+    BIGD w2 = bdNew();
+    BIGD bigOne = bdNew();
+    bdSetShort(bigOne, 1);
+    bdShiftLeft(w2, bigOne, w);
+    bdModulo_s(m, pm, w2);
+
+    char* message = NULL;
+    size_t nchars = bdConvToDecimal(m, NULL, 0);
+    message = malloc(nchars+1); 
+    bdConvToDecimal(m,message, nchars+1);
+
+    //printf("Plaintext = %s\n",message);
+    rewind(keyFile);
+    free(tempLine);
+    free(wLine);
+    free(paddedMessage);
+    bdFree(&m);
+    bdFree(&pm);
+    bdFree(&w2);
+    bdFree(&bigOne);
+    return message;
 }

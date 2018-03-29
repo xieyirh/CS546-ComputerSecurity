@@ -14,6 +14,8 @@ int main(int argc, char* argv[]){
         if(file != NULL){
             char* cipherText = NULL;
             cipherText = encryption(argv[2],file);
+            printf("ciphertext = %s\n",cipherText);
+            free(cipherText);
             fclose(file);
         }
         else{
@@ -24,7 +26,9 @@ int main(int argc, char* argv[]){
     else if(argc == 4 && strcmp(argv[1], "-d") == 0){
         FILE* file = fopen(argv[3], "r");
         if(file != NULL){
-            decryption(argv[2],file);
+            char* message = decryption(argv[2],file);
+            printf("Plaintext = %s\n",message);
+            free(message);
             fclose(file);
         }
         else{
