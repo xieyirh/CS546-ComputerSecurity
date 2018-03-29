@@ -12,34 +12,32 @@
  */
 void genPrime(BIGD p, size_t keySize){
     bdRandomBits(p,keySize);
-    while(!bdIsEven(p)){
-        bdSetZero(p);
-        bdRandomBits(p,keySize);
-    }
-
     size_t ntests = 80; //The count of Rabin-miller primality tests to carry out 
     while(!bdIsPrime(p, ntests)){
         bdSetZero(p);
         bdRandomBits(p, keySize);
+        while(bdIsEven(p)){
+            bdSetZero(p);
+            bdRandomBits(p,keySize);
+        }
     }
 }
 
 void genPrimeV2(BIGD p, size_t keySize,size_t w, size_t z ){
-    bdRandomBits(p,2* (keySize + 1) * (w + z));
-    while(bdBitLength(p) < (keySize + 1) *(w + z)){
-        bdRandomBits(p,2* (keySize + 1) * (w + z));
+    size_t k = 5;
+    bdRandomBits(p,keySize);
+    while(bdBitLength(p) < (k + 1) *(w + z) || bdIsEven(p)){
+        bdRandomBits(p,keySize);
     }
     //bdPrint(p, 0x1);
     //printf("The size of p is:%ld\n",bdBitLength(p) );
-    while(!bdIsEven(p)){
-        bdSetZero(p);
-        bdRandomBits(p,2* (keySize + 1) * (w + z));
-    }
-
     size_t ntests = 80; //The count of Rabin-miller primality tests to carry out 
     while(!bdIsPrime(p, ntests)){
         bdSetZero(p);
-        bdRandomBits(p, 2* (keySize + 1) * (w + z));
+        bdRandomBits(p,keySize);
+        while(bdBitLength(p) < (k + 1) *(w + z) || bdIsEven(p)){
+            bdRandomBits(p,keySize);
+        }
     }
 }
 /**
@@ -532,7 +530,7 @@ void keyGenV2(size_t keySize, size_t w, size_t z, char* keyFile){
     p3 = bdNew();
     q = bdNew();
     bigTwo = bdNew();
-    size_t ntests = 80; //The count of Rabin-miller primality tests to carry out
+    size_t ntests = 10; //The count of Rabin-miller primality tests to carry out
     bdSetShort(bigTwo, 2);
     
     genPrimeV2(p1,keySize, w, z);
